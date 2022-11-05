@@ -21,6 +21,7 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ipv4
 from ryu.lib.packet import arp
+from ryu.lib.packet import ether_types
 
 class LearningSwitch(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
@@ -63,13 +64,34 @@ class LearningSwitch(app_manager.RyuApp):
         datapath = msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
+        pkt = packet.Packet(msg.data)
+        eth = pkt.get_protocol(ethernet.ethernet)
 
-        # Get datapath ID to identify the switch
-        dpid = datapath.id
+        in_port = msg.match['in_port']
+        out_port = ofproto.OFPP_FLOOD
+        
+        #Learning only on IP packets
+        if eth.ethertype == ether_types.ETH_TYPE_IP:
+            # Get datapath ID to identify the switch
+            dpid = datapath.id
+            src = eth.src
+            dst = eth.dst
+            self.mac_to_port.setdefault(dpid, {})
 
-        # TODO: learning switch implementation
+            # TODO: learning switch implementation
+            print("IP Packet in : ",src, dst)
+            try:
+                self.mac_to_port[dpid][src] = in_port
+            except:
+                self.mac_to_port[dpid][src] = {}
+                self.mac_to_port[dpid][src] = in_port
 
-
+            if dst in self.mac_to_port[dpid]:
+                out_port = self.mac_to_port[dpid][dst]
+        else:
+            print("Non IP packet : ", eth.src, eth.dst)
+        
+        actions = [parser.OFPActionOutput(out_port)]
         # Construct packet_out message and send it
         out = parser.OFPPacketOut(datapath=datapath,
                                   in_port=in_port, 
