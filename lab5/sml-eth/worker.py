@@ -12,13 +12,13 @@ from scapy.sendrecv import *
 
 
 NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = 4  # TODO: Define me
+CHUNK_SIZE = 8  # TODO: Define me
 
 class SwitchML(Packet):
     name = "SwitchMLPacket"
     fields_desc = [
         BitField("chunck_index", 0, 32),
-        BitField("no_of_worker", 0, 32), #May change to worker rank
+        BitField("worker_rank", 0, 32), #May change to worker rank
         BitField("chunk_size", 0, 32),
     ]
 
@@ -49,7 +49,7 @@ def AllReduce(iface, rank, data, result):
 
         #Create frame
         #Change the no of worker value
-        frame = (Ether(type=0x0001)/SwitchML(chunck_index = chunck_index, no_of_worker = 2, chunck_size = chunck_size)/Raw(payload))
+        frame = (Ether(type=0x0001)/SwitchML(chunck_index = chunck_index, worker_rank = 2, chunck_size = chunck_size)/Raw(payload))
         
         #Send and recv frame
         data = srp(frame, iface=iface)

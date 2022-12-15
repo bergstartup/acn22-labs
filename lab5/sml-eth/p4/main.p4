@@ -1,62 +1,22 @@
-#include <core.p4>
-#include <v1model.p4>
+#include "headers.p4"
 #include "worker_counter.p4"
 #include "compute.p4"
-
-typedef bit<9>  sw_port_t;   /*< Switch port */
-typedef bit<48> mac_addr_t;  /*< MAC address */
-#define MAX_CHUNK_SIZE 1400;
-#define MAX_INT_SIZE 64;
-
-header ethernet_t {
-  /* TODO: Define me */
-  macAddr_t dstAddr;
-  macAddr_t srcAddr;
-  bit<16> etherType;
-}
-
-header sml_t {
-  bit<8> chunck_id;
-  bit<32> no_of_workers;
-  bit<32> chunck_size;
-}
-
-//Chunck size is 8 for  now
-header chunck_t {
-  int<32> val0;
-  int<32> val1;
-  int<32> val2;
-  int<32> val3;
-  int<32> val4;
-  int<32> val5;
-  int<32> val6;
-  int<32> val7;
-}
-
-
-struct headers {
-  ethernet_t eth;
-  sml_t sml;
-  chunck_t chk;
-}
-
-struct metadata { 
-  /* empty */ 
-  bit<32> first_last_flag; //1 if last; 0 if first 
-}
 
 parser TheParser(packet_in packet,
                  out headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-  /* TODO: Implement me */
+
   state start {
         transition parse_ethernet;
     }
 
     state parse_ethernet { 
         packet.extract(hdr.ethernet);
-        transition parse_sml;
+        transition select(hdr.eth.etherType) {
+          0x0001 : parse_sml;
+          default : accept;
+        }
     }
 
     state parse_sml {
