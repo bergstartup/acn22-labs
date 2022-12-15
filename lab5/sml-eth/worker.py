@@ -3,8 +3,8 @@ from lib.test import CreateTestData, RunIntTest
 from lib.worker import *
 from scapy.all import Packet
 
-NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = None  # TODO: Define me
+NUM_ITER   = 4     # TODO: Make sure your program can handle larger values
+CHUNK_SIZE = 4  # TODO: Define me
 
 class SwitchML(Packet):
     name = "SwitchMLPacket"

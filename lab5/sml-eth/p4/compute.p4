@@ -1,3 +1,5 @@
+#include "headers.p4"
+
 control compute(in int<32> inval, in headers hdr, in bit<32> index, out int<32> outval) {
 
     //Define register
