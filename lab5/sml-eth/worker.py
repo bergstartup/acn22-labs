@@ -2,16 +2,24 @@ from lib.gen import GenInts, GenMultipleOfInRange
 from lib.test import CreateTestData, RunIntTest
 from lib.worker import *
 from scapy.all import Packet
+from scapy.sendrecv import *
+
+#Custom imports
+from scapy.layers.inet import *
+from scapy.packet import *
+from scapy.fields import *
+from scapy.sendrecv import *
+
 
 NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = None  # TODO: Define me
+CHUNK_SIZE = 4  # TODO: Define me
 
 class SwitchML(Packet):
     name = "SwitchMLPacket"
     fields_desc = [
-        #Chunk_Id
-        
-        #Vector_payload
+        BitField("chunck_index", 0, 32),
+        BitField("no_of_worker", 0, 32), #May change to worker rank
+        BitField("chunk_size", 0, 32),
     ]
 
 def AllReduce(iface, rank, data, result):
@@ -25,16 +33,28 @@ def AllReduce(iface, rank, data, result):
 
     This function is blocking, i.e. only returns with a result or error
     """
-    iterations = len(data)/CHUNK_SIZE
+    iterations = math.ceil(len(data)/CHUNK_SIZE)
     for i in range(iterations):
         start = i*CHUNK_SIZE
-        chunck_id = i
+        
+        #SML header
+        chunck_index = i
+        chunck_size = CHUNK_SIZE #Change for last element
+        
+        #Payload
         chunck = data[start:start+CHUNK_SIZE]
+        payload = bytearray() #Big endianess, beause p4 runtime uses it
+        for element in chunck:
+            payload.extend(element.to_bytes(length=4,byteorder="big"))
+
         #Create frame
-        #Send frame
-        #Recv frame
-        #Parse it
-        #Append to result
+        #Change the no of worker value
+        frame = (Ether(type=0x0001)/SwitchML(chunck_index = chunck_index, no_of_worker = 2, chunck_size = chunck_size)/Raw(payload))
+        
+        #Send and recv frame
+        data = srp(frame, iface=iface)
+        Log("Frame recv : ",data)
+  
         
 
 def main():
