@@ -11,8 +11,9 @@ control WorkerCounter(in headers hdr, inout metadata meta) {
         bit<32> current_counter;
         Counter.read(current_counter, 0);
         meta.first_last_flag = current_counter;
+        // first worker
         if(current_counter == 0) {
-            Counter.write(0, 2 - 1);
+            Counter.write(0, NUM_WORKERS - 1);
         } else {
             Counter.write(0, current_counter-1);
         }
