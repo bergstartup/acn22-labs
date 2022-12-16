@@ -10,7 +10,7 @@ from scapy.packet import *
 from scapy.fields import *
 from scapy.sendrecv import *
 
-NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
+NUM_ITER   = 32     # TODO: Make sure your program can handle larger values
 CHUNK_SIZE = 32  # TODO: Define me
 SRC_MAC_ADDRESS = get_if_hwaddr("eth0");
 DST_MAC_ADDRESS = 'ff:ff:ff:ff:ff:ff';
