@@ -45,6 +45,7 @@ control TheIngress(inout headers hdr,
                    inout metadata meta,
                    inout standard_metadata_t standard_metadata) {
                     
+  // declare the controls
 
   WorkerCounter() wctr;
 
@@ -82,6 +83,8 @@ control TheIngress(inout headers hdr,
   Compute() c31;
 
   NextStep() nxt;
+
+  // computational steps
 
   apply {
     if (hdr.sml.isValid() && hdr.eth.etherType == 0x8777) {

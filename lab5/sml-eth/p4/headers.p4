@@ -5,8 +5,6 @@ typedef bit<9>  sw_port_t;   /*< Switch port */
 typedef bit<48> mac_addr_t;  /*< MAC address */
 typedef bit<16> ether_type_t;
 typedef bit<32> val_t;
-// #define MAX_CHUNK_SIZE 1400;
-// #define MAX_INT_SIZE 64;
 const int NUM_WORKERS = 8;
 
 header ethernet_t {
