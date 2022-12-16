@@ -17,7 +17,7 @@ CHUNK_SIZE = 8  # TODO: Define me
 class SwitchML(Packet):
     name = "SwitchMLPacket"
     fields_desc = [
-        BitField("chunck_index", 0, 32),
+        BitField("chunk_index", 0, 32),
         BitField("worker_rank", 0, 32), #May change to worker rank
         BitField("chunk_size", 0, 32),
     ]
@@ -38,22 +38,27 @@ def AllReduce(iface, rank, data, result):
         start = i*CHUNK_SIZE
         
         #SML header
-        chunck_index = i
-        chunck_size = CHUNK_SIZE #Change for last element
+        chunk_index = i
+        chunk_size = CHUNK_SIZE #Change for last element
         
         #Payload
-        chunck = data[start:start+CHUNK_SIZE]
+        chunk = data[start:start+CHUNK_SIZE]
         payload = bytearray() #Big endianess, beause p4 runtime uses it
-        for element in chunck:
+        for element in chunk:
             payload.extend(element.to_bytes(length=4,byteorder="big"))
 
         #Create frame
         #Change the no of worker value
-        frame = (Ether(type=0x0001)/SwitchML(chunck_index = chunck_index, worker_rank = 2, chunck_size = chunck_size)/Raw(payload))
+        frame = (Ether(type=0x0001)/SwitchML(chunk_index = chunk_index, worker_rank = rank, chunk_size = CHUNK_SIZE)/Raw(payload))
         
         #Send and recv frame
         data = srp(frame, iface=iface)
+        
         Log("Frame recv : ",data)
+        print(data)
+        # for j in range(CHUNK_SIZE):
+        #     result[i * CHUNK_SIZE + j] = int.from_bytes(SwitchML(data.res[0][1].payload).payload.load[j * 4: (j + 1) * 4], "big")
+
   
         
 
@@ -64,6 +69,7 @@ def main():
     for i in range(NUM_ITER):
         num_elem = GenMultipleOfInRange(2, 2048, 2 * CHUNK_SIZE) # You may want to 'fix' num_elem for debugging
         data_out = GenInts(num_elem)
+        print(data_out)
         data_in = GenInts(num_elem, 0)
         CreateTestData("eth-iter-%d" % i, rank, data_out)
         AllReduce(iface, rank, data_out, data_in)
