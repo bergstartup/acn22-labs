@@ -15,8 +15,8 @@ import sys
 
 NUM_ITER   = 1    # TODO: Make sure your program can handle larger values
 CHUNK_SIZE = 30  # TODO: Define me
-SRC_MAC_ADDRESS = get_if_hwaddr("eth0");
-DST_MAC_ADDRESS = 'ff:ff:ff:ff:ff:ff';
+SRC_MAC_ADDRESS = get_if_hwaddr("eth0")
+DST_MAC_ADDRESS = 'ff:ff:ff:ff:ff:ff'
 MAX_CHUNK_SIZE = 32
 
 class SwitchML(Packet):
@@ -53,7 +53,7 @@ def AllReduce(iface, rank, data, result, total_worker):
             payload.extend(element.to_bytes(length=4,byteorder="big"))
 
         #Create frame
-        frame = (Ether(src=SRC_MAC_ADDRESS, dst = 'ff:ff:ff:ff:ff:ff', type=0x8777)/SwitchML(num_workers=int(total_worker), chunk_size=chunk_size)/Raw(payload))
+        frame = (Ether(src=SRC_MAC_ADDRESS, dst = DST_MAC_ADDRESS, type=0x8777)/SwitchML(num_workers=int(total_worker), chunk_size=chunk_size)/Raw(payload))
         frame.show()
         #Send and recv frame
         answered , unanswered = srp(x = frame, iface=iface)
