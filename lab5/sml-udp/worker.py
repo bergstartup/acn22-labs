@@ -7,7 +7,7 @@ from lib.comm import send,receive
 
 NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
 CHUNK_SIZE = 30  # TODO: Define me
-Address_to_Send = ("192.168.1.1",8000)
+Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
 
 
@@ -63,7 +63,7 @@ def main():
     rank = GetRankOrExit()
 
     s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-    s.bind(("127.0.0.1",8000))
+    s.bind(("0.0.0.0",8000))
     # NOTE: This socket will be used for all AllReduce calls.
     #       Feel free to go with a different design (e.g. multiple sockets)
     #       if you want to, but make sure the loop below still works
