@@ -12,7 +12,7 @@ control WorkerCounter(in headers hdr, inout metadata meta) {
         meta.first_last_flag = current_counter;
         // first worker has value 0
         if(current_counter == 0) {
-            Counter.write(0, NUM_WORKERS - 1);
+            Counter.write(0, hdr.sml.worker_count - 1);
         } else {
             Counter.write(0, current_counter-1);
         }

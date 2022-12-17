@@ -9,19 +9,24 @@ from scapy.layers.inet import *
 from scapy.packet import *
 from scapy.fields import *
 from scapy.sendrecv import *
+import sys
 
-NUM_ITER   = 32     # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = 32  # TODO: Define me
+
+
+NUM_ITER   = 1    # TODO: Make sure your program can handle larger values
+CHUNK_SIZE = 30  # TODO: Define me
 SRC_MAC_ADDRESS = get_if_hwaddr("eth0");
 DST_MAC_ADDRESS = 'ff:ff:ff:ff:ff:ff';
+MAX_CHUNK_SIZE = 32
 
 class SwitchML(Packet):
     name = "SwitchMLPacket"
     fields_desc = [
+        BitField("num_workers", 0, 32),
         BitField("chunk_size", 0, 32)
     ]
 
-def AllReduce(iface, rank, data, result):
+def AllReduce(iface, rank, data, result, total_worker):
     """
     Perform in-network all-reduce over ethernet
 
@@ -33,6 +38,7 @@ def AllReduce(iface, rank, data, result):
     This function is blocking, i.e. only returns with a result or error
     """
     iterations = math.ceil(len(data)/CHUNK_SIZE)
+    print(rank, total_worker)
     for i in range(iterations):
         #SML header
         chunk_size = CHUNK_SIZE #Change for last element
@@ -41,12 +47,14 @@ def AllReduce(iface, rank, data, result):
         #Divide the data arrays into chunk sizes
         chunk = data[chunk_size*i:chunk_size*(i+1)]
         payload = bytearray() #Big endianess, because p4 runtime uses it
+        filler = [0 for i in range(chunk_size, MAX_CHUNK_SIZE)]
+        chunk.extend(filler)
         for element in chunk:
             payload.extend(element.to_bytes(length=4,byteorder="big"))
 
         #Create frame
-        frame = (Ether(src=SRC_MAC_ADDRESS, dst = 'ff:ff:ff:ff:ff:ff', type=0x8777)/SwitchML(chunk_size = chunk_size)/Raw(payload))
-        
+        frame = (Ether(src=SRC_MAC_ADDRESS, dst = 'ff:ff:ff:ff:ff:ff', type=0x8777)/SwitchML(num_workers=int(total_worker), chunk_size=chunk_size)/Raw(payload))
+        frame.show()
         #Send and recv frame
         answered , unanswered = srp(x = frame, iface=iface)
         
@@ -58,13 +66,14 @@ def AllReduce(iface, rank, data, result):
 def main():
     iface = 'eth0'
     rank = GetRankOrExit()
+    num_workers = sys.argv[2]
     Log("Started...")
     for i in range(NUM_ITER):
         num_elem = GenMultipleOfInRange(2, 2048, 2 * CHUNK_SIZE) # You may want to 'fix' num_elem for debugging
         input_data = GenInts(num_elem)
         output_data = GenInts(num_elem, 0)
         CreateTestData("eth-iter-%d" % i, rank, input_data)
-        AllReduce(iface, rank, input_data, output_data)
+        AllReduce(iface, rank, input_data, output_data, num_workers)
         RunIntTest("eth-iter-%d" % i, rank, output_data, True)
     Log("Done")
 

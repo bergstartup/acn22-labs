@@ -4,7 +4,7 @@ from mininet.topo import Topo
 from mininet.cli import CLI
 import os
 
-NUM_WORKERS = 8 # TODO: Make sure your program can handle larger values
+NUM_WORKERS = 2 # TODO: Make sure your program can handle larger values
 
 class SMLTopo(Topo):
     def __init__(self, **opts):
@@ -26,7 +26,7 @@ def RunWorkers(net):
     worker = lambda rank: "w%i" % rank
     log_file = lambda rank: os.path.join(os.environ['APP_LOGS'], "%s.log" % worker(rank))
     for i in range(NUM_WORKERS):
-        net.get(worker(i)).sendCmd('python worker.py %d > %s' % (i, log_file(i)))
+        net.get(worker(i)).sendCmd('python worker.py %d %d > %s' % (i, NUM_WORKERS, log_file(i)))
     for i in range(NUM_WORKERS):
         net.get(worker(i)).waitOutput()
 

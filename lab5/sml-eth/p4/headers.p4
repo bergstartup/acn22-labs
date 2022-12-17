@@ -5,7 +5,6 @@ typedef bit<9>  sw_port_t;   /*< Switch port */
 typedef bit<48> mac_addr_t;  /*< MAC address */
 typedef bit<16> ether_type_t;
 typedef bit<32> val_t;
-const int NUM_WORKERS = 8;
 
 header ethernet_t {
   /* TODO: Define me */
@@ -15,6 +14,7 @@ header ethernet_t {
 }
 
 header sml_t {
+  bit<32> worker_count;
   bit<32> chunk_size;
 }
 
