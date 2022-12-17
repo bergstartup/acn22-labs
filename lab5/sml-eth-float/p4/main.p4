@@ -4,7 +4,7 @@
 #include "worker_counter.p4"
 #include "compute.p4"
 #include "next_step.p4"
-
+#include "mvalue.p4"
 parser TheParser(packet_in packet,
                  out headers hdr,
                  inout metadata meta,
@@ -82,7 +82,7 @@ control TheIngress(inout headers hdr,
   Compute() c30;
   Compute() c31;
 
-  Get_Mvalue() mv;
+  GetMValue() mv;
 
   NextStep() nxt;
 
@@ -160,7 +160,7 @@ control TheIngress(inout headers hdr,
         c31.apply(hdr.chk.val31, hdr, 31, hdr.chk.val31, meta);
 
         //Get m val
-        mv.apply(hdr.sml.m_val);
+        mv.apply(hdr.sml.m_val, meta);
 
         // Decide what to do with this packet
         nxt.apply(meta, standard_metadata);
