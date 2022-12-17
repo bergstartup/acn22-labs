@@ -11,6 +11,11 @@ class SMLTopo(Topo):
         Topo.__init__(self, **opts)
         # TODO: Implement me. Feel free to modify the constructor signature
         # NOTE: Make sure worker names are consistent with RunWorkers() below
+    def build(self):
+        switch = self.addSwitch("s1")
+        for i in range(NUM_WORKERS):
+            host = self.addHost(f"w{i}")
+            self.addLink(switch, host)
 
 def RunWorkers(net):
     """
