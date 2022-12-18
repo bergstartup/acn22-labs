@@ -5,6 +5,7 @@
 #include "compute.p4"
 #include "next_step.p4"
 #include "arpHandler.p4"
+#include "udpReplier.p4"
 
 parser TheParser(packet_in packet,
                  out headers hdr,
@@ -213,8 +214,10 @@ control TheIngress(inout headers hdr,
 control TheEgress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+  
+  sendUDPReply() ur;
   apply {
-    /* TODO: Implement me (if needed) */
+    ur.apply(hdr, standard_metadata);
   }
 }
 
@@ -227,10 +230,14 @@ control TheChecksumComputation(inout headers  hdr, inout metadata meta) {
 control TheDeparser(packet_out packet, in headers hdr) {
   apply {
     packet.emit(hdr.eth);
-    packet.emit(hdr.arp);
-    packet.emit(hdr.arp_ipv4);
-    //packet.emit(hdr.sml);
-    //packet.emit(hdr.chk);
+    if (hdr.arp.isValid()) {
+      packet.emit(hdr.arp);
+      packet.emit(hdr.arp_ipv4);
+    }
+    if (hdr.sml.isValid()) {
+      packet.emit(hdr.sml);
+      packet.emit(hdr.chk);
+    }
   }
 }
 
