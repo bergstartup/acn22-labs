@@ -108,6 +108,8 @@ header chunk_t {
 
 struct headers {
   ethernet_t eth;
+  arp_h arp;
+  arp_ipv4_h arp_ipv4;
   ipv4_t ipv4;
   udp_t udp;
   sml_t sml;

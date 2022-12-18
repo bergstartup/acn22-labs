@@ -4,6 +4,7 @@
 #include "worker_counter.p4"
 #include "compute.p4"
 #include "next_step.p4"
+#include "arpHandler.p4"
 
 parser TheParser(packet_in packet,
                  out headers hdr,
@@ -82,6 +83,7 @@ control TheIngress(inout headers hdr,
                     
   // declare the controls
 
+  arpResponder() arp;
   WorkerCounter() wctr;
 
   Compute() c0;
@@ -122,6 +124,11 @@ control TheIngress(inout headers hdr,
   // computational steps
 
   apply {
+    //Handler ARP
+    if (hdr.arp.isValid()) {
+      arp.apply();
+    }
+
     //Switch ML
     if (hdr.sml.isValid()) {
       //Atomic execution

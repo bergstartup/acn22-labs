@@ -35,8 +35,15 @@ def RunControlPlane(net):
     """
     One-time control plane configuration
     """
-    # TODO: Implement me (if needed)
-    pass
+    #Add MAC entry of switch to table for ARP
+    switch = net.switches[0]
+    switch_mac = int(switch.mac.replace(":",""),16)
+    switch.insertTableEntry(
+        table_name="TheIngress.arp.arp_responder",
+        match_fields={"hdr.arp.isValid()": True},
+        action_name="TheIngress.arp.sendARPResponse",
+        action_params={"switch_mac_addr": switch_mac},
+    )
 
 topo = SMLTopo()
 net = P4Mininet(program="p4/main.p4", topo=topo)
