@@ -1,7 +1,8 @@
 from lib.gen import GenInts, GenMultipleOfInRange
 from lib.test import CreateTestData, RunIntTest
 from lib.worker import *
-from scapy.all import Packet
+from scapy.all import Packet, Raw
+from scapy.fields import *
 import socket
 from lib.comm import send,receive
 
@@ -58,7 +59,7 @@ def AllReduce(soc, rank, data, result, total_worker):
         #take 4 bytes from the payload and create an integer array of the results
         for j in range(chunk_size):
             #result[i * chunk_size + j] = int.from_bytes(SwitchML(bytes(answered.res[0][1].payload)).payload.load[j * 4: (j + 1) * 4], "big")
-
+            pass
 def main():
     rank = GetRankOrExit()
 

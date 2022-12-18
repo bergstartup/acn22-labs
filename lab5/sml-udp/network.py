@@ -37,10 +37,10 @@ def RunControlPlane(net):
     """
     #Add MAC entry of switch to table for ARP
     switch = net.switches[0]
-    switch_mac = int(switch.mac.replace(":",""),16)
+    switch_mac = int("00:00:00:00:00:10".replace(":",""),16)
     switch.insertTableEntry(
         table_name="TheIngress.arp.arp_responder",
-        match_fields={"hdr.arp.isValid()": True},
+        match_fields={"hdr.arp.opcode": 1},
         action_name="TheIngress.arp.sendARPResponse",
         action_params={"switch_mac_addr": switch_mac},
     )

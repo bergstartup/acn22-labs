@@ -26,16 +26,16 @@ parser TheParser(packet_in packet,
 
     //Parse ARP
     state parse_arp {
-        pkt.extract(hdr.arp);
+        packet.extract(hdr.arp);
         transition select(hdr.arp.hw_type, hdr.arp.proto_type) {
             (0x0001, ETHERTYPE_IPV4) : parse_arp_ipv4;
-            default: accept_regular;
+            default: accept;
         }
     }
 
     state parse_arp_ipv4 {
-        pkt.extract(hdr.arp_ipv4);
-        transition accept_regular;
+        packet.extract(hdr.arp_ipv4);
+        transition accept;
     }
 
 
@@ -71,9 +71,10 @@ parser TheParser(packet_in packet,
 
 
 control TheChecksumVerification(inout headers hdr, inout metadata meta) {
-  apply {
-    /* TODO: Implement me (if needed) */
+
+   apply{
   }
+
 }
 
 
@@ -126,7 +127,7 @@ control TheIngress(inout headers hdr,
   apply {
     //Handler ARP
     if (hdr.arp.isValid()) {
-      arp.apply();
+      arp.apply(hdr, standard_metadata);
     }
 
     //Switch ML
@@ -226,8 +227,10 @@ control TheChecksumComputation(inout headers  hdr, inout metadata meta) {
 control TheDeparser(packet_out packet, in headers hdr) {
   apply {
     packet.emit(hdr.eth);
-    packet.emit(hdr.sml);
-    packet.emit(hdr.chk);
+    packet.emit(hdr.arp);
+    packet.emit(hdr.arp_ipv4);
+    //packet.emit(hdr.sml);
+    //packet.emit(hdr.chk);
   }
 }
 

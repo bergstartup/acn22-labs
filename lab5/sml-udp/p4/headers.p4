@@ -3,10 +3,11 @@
 
 typedef bit<9>  sw_port_t;   /*< Switch port */
 typedef bit<48> mac_addr_t;  /*< MAC address */
-typedef bit<16> ether_type_t;
 typedef bit<32> val_t;
 typedef bit<16> port_t;
 typedef bit<16> ether_type_t;
+typedef bit<32> ipv4_addr_t;
+
 
 const ether_type_t ETHERTYPE_IPV4   = 16w0x0800;
 const ether_type_t ETHERTYPE_ARP    = 16w0x0806;
@@ -55,8 +56,8 @@ header ipv4_t {
     bit<8> ttl;
     bit<8> protocol;
     bit<16> hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    ipv4_addr_t srcAddr;
+    ipv4_addr_t dstAddr;
 }
 
 header udp_t {
