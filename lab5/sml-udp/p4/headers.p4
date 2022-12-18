@@ -5,12 +5,65 @@ typedef bit<9>  sw_port_t;   /*< Switch port */
 typedef bit<48> mac_addr_t;  /*< MAC address */
 typedef bit<16> ether_type_t;
 typedef bit<32> val_t;
+typedef bit<16> port_t;
+typedef bit<16> ether_type_t;
+
+const ether_type_t ETHERTYPE_IPV4   = 16w0x0800;
+const ether_type_t ETHERTYPE_ARP    = 16w0x0806;
+
+
+enum bit<8> ip_protocol_t {
+    UDP  = 17
+}
+
+enum bit<16> arp_opcode_t {
+    REQUEST = 1,
+    REPLY   = 2
+}
+
 
 header ethernet_t {
-  /* TODO: Define me */
   mac_addr_t dstAddr;
   mac_addr_t srcAddr;
   ether_type_t etherType;
+}
+
+
+header arp_h {
+    bit<16>       hw_type;
+    ether_type_t  proto_type;
+    bit<8>        hw_addr_len;
+    bit<8>        proto_addr_len;
+    arp_opcode_t  opcode;
+}
+
+header arp_ipv4_h {
+    mac_addr_t   src_hw_addr;
+    ipv4_addr_t  src_proto_addr;
+    mac_addr_t   dst_hw_addr;
+    ipv4_addr_t  dst_proto_addr;
+}
+
+header ipv4_t {
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    ip4Addr_t srcAddr;
+    ip4Addr_t dstAddr;
+}
+
+header udp_t {
+    port_t srcPort;
+    port_t dstPort;
+    bit<16> hdrLen;
+    bit<16> checksum;
 }
 
 header sml_t {
@@ -53,15 +106,15 @@ header chunk_t {
   val_t val31;
 }
 
-
 struct headers {
   ethernet_t eth;
+  ipv4_t ipv4;
+  udp_t udp;
   sml_t sml;
   chunk_t chk;
 }
 
 struct metadata { 
-  /* empty */ 
   bit<32> first_last_flag; //1 if last; 0 if first 
 }
 

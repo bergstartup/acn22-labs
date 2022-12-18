@@ -17,10 +17,45 @@ parser TheParser(packet_in packet,
     state parse_ethernet { 
         packet.extract(hdr.eth);
         transition select(hdr.eth.etherType) {
-          0x8777 : parse_sml;
+          ETHERTYPE_ARP: parse_arp;
+          ETHERTYPE_IPV4: parse_ipv4;
           default : accept;
         }
     }
+
+    //Parse ARP
+    state parse_arp {
+        pkt.extract(hdr.arp);
+        transition select(hdr.arp.hw_type, hdr.arp.proto_type) {
+            (0x0001, ETHERTYPE_IPV4) : parse_arp_ipv4;
+            default: accept_regular;
+        }
+    }
+
+    state parse_arp_ipv4 {
+        pkt.extract(hdr.arp_ipv4);
+        transition accept_regular;
+    }
+
+
+    //Parse IP
+    state parse_ipv4 {
+      packet.extract(hdr.ipv4);
+      transition select(hdr.ipv4.protocol) {
+        ip_protocol_t.UDP  : parse_udp;
+        default : accept;
+      }
+    }
+
+    state parse_udp {
+      packet.extract(hdr.udp);
+      //Parse sml if dst port is 8000
+      transition select(hdr.udp.dstPort) {
+        8000: parse_sml;
+        default: accept;
+      }
+    }
+  
 
     state parse_sml {
         packet.extract(hdr.sml);
@@ -87,7 +122,8 @@ control TheIngress(inout headers hdr,
   // computational steps
 
   apply {
-    if (hdr.sml.isValid() && hdr.eth.etherType == 0x8777) {
+    //Switch ML
+    if (hdr.sml.isValid()) {
       //Atomic execution
       @atomic{
         //worker_counter();

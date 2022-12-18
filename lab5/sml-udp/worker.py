@@ -18,7 +18,7 @@ class SwitchML(Packet):
        BitField("chunk_size", 0, 32)
     ]
 
-def AllReduce(soc, rank, data, result):
+def AllReduce(soc, rank, data, result, total_worker):
     """
     Perform in-network all-reduce over UDP
 
@@ -68,13 +68,14 @@ def main():
     #       Feel free to go with a different design (e.g. multiple sockets)
     #       if you want to, but make sure the loop below still works
 
+    num_workers = sys.argv[2]
     Log("Started...")
     for i in range(NUM_ITER):
         num_elem = GenMultipleOfInRange(2, 2048, 2 * CHUNK_SIZE) # You may want to 'fix' num_elem for debugging
         data_out = GenInts(num_elem)
         data_in = GenInts(num_elem, 0)
         CreateTestData("udp-iter-%d" % i, rank, data_out)
-        AllReduce(s, rank, data_out, data_in)
+        AllReduce(s, rank, data_out, data_in, num_workers)
         RunIntTest("udp-iter-%d" % i, rank, data_in, True)
     Log("Done")
 
