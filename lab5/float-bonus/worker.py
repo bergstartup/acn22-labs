@@ -1,5 +1,5 @@
 from lib.gen import GenInts, GenMultipleOfInRange
-from lib.test import CreateTestData, RunIntTest
+from lib.test import CreateTestData, RunFloatTest
 from lib.worker import *
 from scapy.all import Packet, Raw
 from scapy.fields import *
@@ -65,12 +65,12 @@ def AllReduce(soc, rank, data, result, total_worker):
 
         #Payload
         #Divide the data arrays into chunk sizes and scale it
-        chunk = data[chunk_size*i:chunk_size*(i+1)]
+        chunk = makeup_data[chunk_size*i:chunk_size*(i+1)]
         for j in range(len(chunk)):
             chunk[j] *= scaling_factor
         
         #Get possible m for next chunk
-        qc = data[chunk_size*(i+1):chunk_size*(i+2)]
+        qc = makeup_data[chunk_size*(i+1):chunk_size*(i+2)]
         try:
             m_val = get_m(qc)
         except:
@@ -87,6 +87,7 @@ def AllReduce(soc, rank, data, result, total_worker):
 
         #Create frame
         switch_ml_packet = SwitchML(num_workers=int(total_worker), worker_rank=rank, chunk_size=chunk_size, chunk_id=i+1, total_chunks=iterations, m_val = m_val,slot_mod=i%2)/Raw(payload)
+        switch_ml_packet.show()
         while True:
             #Convert to bytes
             unreliable_send(soc, bytes(switch_ml_packet), Address_to_Send)
@@ -108,8 +109,10 @@ def AllReduce(soc, rank, data, result, total_worker):
             continue
         #take 4 bytes from the payload and create an integer array of the results
         for j in range(chunk_size):
-            result[(i-1) * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big")
-
+            try:
+                result[(i-1) * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big") / prev_factor
+            except:
+                pass
 def main():
     rank = GetRankOrExit()
 
@@ -127,7 +130,7 @@ def main():
         data_in = GenInts(num_elem, 0)
         CreateTestData("udp-rel-iter-%d" % i, rank, data_out)
         AllReduce(s, rank, data_out, data_in, num_workers)
-        RunIntTest("udp-rel-iter-%d" % i, rank, data_in, True)
+        RunFloatTest("udp-rel-iter-%d" % i, rank, data_in, True)
     Log("Done")
 
 if __name__ == '__main__':

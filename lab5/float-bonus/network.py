@@ -5,7 +5,7 @@ from mininet.cli import CLI
 from ipaddress import ip_address
 import os
 
-NUM_WORKERS = 3 # TODO: Make sure your program can handle larger values
+NUM_WORKERS = 2 # TODO: Make sure your program can handle larger values
 
 class SMLTopo(Topo):
     def __init__(self, **opts):
