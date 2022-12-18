@@ -148,7 +148,7 @@ def RunFloatTest(testid, rank, data, tol=1e-04, num_fails=4, std_out=False):
 
     If the test fails, up to num_fails failures will be shown
     """
-    def _test_float(a, b, rel_tol=rel_t, abs_tol=0.0):
+    def _test_float(a, b, rel_tol=tol, abs_tol=0.0):
         # https://peps.python.org/pep-0485/#proposed-implementation
         return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
     return _run_test(testid, rank, data, _test_float, float, not std_out, num_fails)
