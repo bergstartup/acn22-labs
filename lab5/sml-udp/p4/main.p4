@@ -215,29 +215,64 @@ control TheEgress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
   
-  sendUDPReply() ur;
+  udp_replier() ur;
   apply {
-    ur.apply(hdr, standard_metadata);
+    if (hdr.udp.isValid()) {
+    	ur.apply(hdr, standard_metadata);
+    }
   }
 }
 
 control TheChecksumComputation(inout headers  hdr, inout metadata meta) {
   apply {
-    /* TODO: Implement me (if needed) */
+   update_checksum(
+      hdr.ipv4.isValid(),
+      { 
+        hdr.ipv4.version,
+        hdr.ipv4.ihl,
+        hdr.ipv4.diffserv,
+        hdr.ipv4.totalLen,
+        hdr.ipv4.identification,
+        hdr.ipv4.flags,
+        hdr.ipv4.fragOffset,
+        hdr.ipv4.ttl,
+        hdr.ipv4.protocol,
+        hdr.ipv4.srcAddr,
+        hdr.ipv4.dstAddr
+      },
+      hdr.ipv4.hdrChecksum,
+      HashAlgorithm.csum16
+    );
+
+    update_checksum(
+      hdr.sml.isValid(),
+      { 
+        hdr.ipv4.srcAddr,
+        hdr.ipv4.dstAddr,
+        (bit<8>)0x00,
+        hdr.ipv4.protocol,
+        hdr.udp.hdrLen,
+        hdr.udp.srcPort,
+        hdr.udp.dstPort,
+        hdr.udp.hdrLen,
+        hdr.sml,
+        hdr.chk
+      },
+      hdr.udp.checksum,
+      HashAlgorithm.csum16
+    );
   }
 }
 
 control TheDeparser(packet_out packet, in headers hdr) {
   apply {
     packet.emit(hdr.eth);
-    if (hdr.arp.isValid()) {
-      packet.emit(hdr.arp);
-      packet.emit(hdr.arp_ipv4);
-    }
-    if (hdr.sml.isValid()) {
-      packet.emit(hdr.sml);
-      packet.emit(hdr.chk);
-    }
+    packet.emit(hdr.arp);
+    packet.emit(hdr.arp_ipv4);
+    packet.emit(hdr.ipv4);
+    packet.emit(hdr.udp);
+    packet.emit(hdr.sml);
+    packet.emit(hdr.chk);
   }
 }
 

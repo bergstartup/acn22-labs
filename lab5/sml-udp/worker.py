@@ -52,14 +52,14 @@ def AllReduce(soc, rank, data, result, total_worker):
 
         #Create frame
         switch_ml_packet = SwitchML(num_workers=int(total_worker), chunk_size=chunk_size)/Raw(payload)
-        switch_ml_packet.show()
         #Convert to bytes
         send(soc, bytes(switch_ml_packet), Address_to_Send)
-        recvd = receive(soc,1024)
+        recvd, _ = receive(soc,1024)
         #take 4 bytes from the payload and create an integer array of the results
+        print(SwitchML(recvd).payload.load)
         for j in range(chunk_size):
-            #result[i * chunk_size + j] = int.from_bytes(SwitchML(bytes(answered.res[0][1].payload)).payload.load[j * 4: (j + 1) * 4], "big")
-            pass
+            result[i * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big") 
+
 def main():
     rank = GetRankOrExit()
 

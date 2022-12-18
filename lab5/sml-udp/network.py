@@ -28,7 +28,7 @@ def RunWorkers(net):
     worker = lambda rank: "w%i" % rank
     log_file = lambda rank: os.path.join(os.environ['APP_LOGS'], "%s.log" % worker(rank))
     for i in range(NUM_WORKERS):
-        net.get(worker(i)).sendCmd('python worker.py %d > %s' % (i, log_file(i)))
+        net.get(worker(i)).sendCmd('python worker.py %d %d > %s' % (i, NUM_WORKERS, log_file(i)))
     for i in range(NUM_WORKERS):
         net.get(worker(i)).waitOutput()
 
@@ -49,9 +49,9 @@ def RunControlPlane(net):
     #Add IP:Port entry in switch for all nodes
     port_to_node = {}
     for link in net.links:
-        switch = link.intf1
+        sw = link.intf1
         host = link.intf2
-        port_no = switch.node.ports[switch]
+        port_no = sw.node.ports[sw]
         port_to_node[port_no] = host.node
         
     for key, value in switch.ports.items():
