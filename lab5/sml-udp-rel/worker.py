@@ -4,11 +4,11 @@ from lib.worker import *
 from scapy.all import Packet, Raw
 from scapy.fields import *
 import socket
-from lib.comm import send,receive
+from lib.comm import unreliable_send,receive
 import sys
 
-NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = 30  # TODO: Define me
+NUM_ITER   = 2     # TODO: Make sure your program can handle larger values
+CHUNK_SIZE = 32  # TODO: Define me
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
 
@@ -20,7 +20,7 @@ class SwitchML(Packet):
         BitField("chunk_size", 0, 32),
         BitField("chunk_id", 0, 32),
         BitField("total_chunks", 0, 32),
-        BitField("slot_mod",0,1),
+        BitField("slot_mod",0,8),
     ]
 
 def AllReduce(soc, rank, data, result, total_worker):
@@ -43,8 +43,8 @@ def AllReduce(soc, rank, data, result, total_worker):
     #       You may use the functions unreliable_send() and unreliable_receive()
     #       to test how your solution handles dropped/delayed packets
     iterations = math.ceil(len(data)/CHUNK_SIZE)
-    print(rank, total_worker)
-    soc.settimeout(2.0)
+    print("Iterations : ", iterations)
+    soc.settimeout(0.5)
     for i in range(iterations):
         #SML header
         chunk_size = CHUNK_SIZE #Change for last element
@@ -59,29 +59,28 @@ def AllReduce(soc, rank, data, result, total_worker):
             payload.extend(element.to_bytes(length=4,byteorder="big"))
 
         #Create frame
-        switch_ml_packet = SwitchML(num_workers=int(total_worker), worker_rank=rank, chunk_size=chunk_size, chunk_id=i, total_chunks=iterations-1, slot_mod=i%2)/Raw(payload)
-        
-        send_again:
+        switch_ml_packet = SwitchML(num_workers=int(total_worker), worker_rank=rank, chunk_size=chunk_size, chunk_id=i+1, total_chunks=iterations, slot_mod=i%2)/Raw(payload)
+        switch_ml_packet.show()
+        while True:
             #Convert to bytes
             unreliable_send(soc, bytes(switch_ml_packet), Address_to_Send)
             try:
-                while True:
-                    recvd, _ = receive(soc,1024)
-                    recvd_chunk = SwitchML(recvd).chunk_id.load
-                    if recvd_chunk == i:
-                        goto go_next
+                recvd, _ = receive(soc,1024)
+                recvd_chunk = SwitchML(recvd).chunk_id
+                if recvd_chunk == i+1:
+                    break
             except:
-                goto send_again
-            
+                pass
+        print("Recvd : ",recvd_chunk) 
         #take 4 bytes from the payload and create an integer array of the results
-        go_next:
-            for j in range(chunk_size):
-                result[i * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big")
+        for j in range(chunk_size):
+            result[i * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big")
 
 def main():
     rank = GetRankOrExit()
 
-    s = None # TODO: Create a UDP socket. 
+    s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)# TODO: Create a UDP socket. 
+    s.bind(("0.0.0.0",8000))
     # NOTE: This socket will be used for all AllReduce calls.
     #       Feel free to go with a different design (e.g. multiple sockets)
     #       if you want to, but make sure the loop below still works
@@ -90,8 +89,8 @@ def main():
     Log("Started...")
     for i in range(NUM_ITER):
         num_elem = GenMultipleOfInRange(2, 2048, 2 * CHUNK_SIZE) # You may want to 'fix' num_elem for debugging
-        data_out = GenInts(num_elem)
-        data_in = GenInts(num_elem, 0)
+        data_out = GenInts(2*CHUNK_SIZE)
+        data_in = GenInts(2*CHUNK_SIZE, 0)
         CreateTestData("udp-rel-iter-%d" % i, rank, data_out)
         AllReduce(s, rank, data_out, data_in, num_workers)
         RunIntTest("udp-rel-iter-%d" % i, rank, data_in, True)

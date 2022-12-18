@@ -74,7 +74,7 @@ header sml_t {
   bit<32> chunk_size;
   bit<32> chunk_id;
   bit<32> total_chunks;
-  bit<1> slot_mod;
+  bit<8> slot_mod;
 }
 
 header chunk_t {

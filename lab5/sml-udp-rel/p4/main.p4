@@ -88,7 +88,7 @@ control TheIngress(inout headers hdr,
 
   arpResponder() arp;
 
-  rel_checker() rel;
+  relChecker() rel;
   WorkerCounter() wctr;
 
   Compute() c0;
@@ -139,7 +139,7 @@ control TheIngress(inout headers hdr,
       //Atomic execution
       @atomic{
         //Check if duplicate
-        rel(hdr, meta);
+        rel.apply(hdr, meta);
         //worker_counter();
         wctr.apply(hdr, meta);
         //Compute 0
@@ -222,7 +222,7 @@ control TheEgress(inout headers hdr,
   
   udp_replier() ur;
   apply {
-    if (hdr.udp.isValid()) {
+    if(hdr.udp.isValid()) {
     	ur.apply(hdr, standard_metadata);
     }
   }
