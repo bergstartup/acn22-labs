@@ -5,7 +5,7 @@
 
 control WorkerCounter(in headers hdr, inout metadata meta) {
     // Define worker counter register
-    register<bit<32>>(MAX_WORKERS) Counter;
+    register<bit<32>>(SLOT_SIZE) Counter;
     apply {
             bit<32> current_counter;
             Counter.read(current_counter, (bit<32>)hdr.sml.slot_mod);
@@ -19,7 +19,7 @@ control WorkerCounter(in headers hdr, inout metadata meta) {
             	}
 	    } else {
 		if(current_counter != 0) {
-			//Still yet to recv other packets
+			//Still yet to recv other packets; so flag to discard it
 			meta.first_last_flag = 0;
 		}
 	    }

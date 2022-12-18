@@ -35,7 +35,7 @@ control arpResponder(inout headers hdr, inout standard_metadata_t standard_metad
 		sendARPResponse;
 		NoAction;
 	}
-        size = 8;
+        size = MAX_WORKERS;
         default_action = NoAction();
     }
 
