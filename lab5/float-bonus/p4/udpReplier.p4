@@ -1,3 +1,6 @@
+#ifndef _UDP_REPLIER_
+#define _UDP_REPLIER_
+
 #include "headers.p4"
 
 control udp_replier(inout headers hdr, inout standard_metadata_t standard_metadata) {
@@ -13,9 +16,9 @@ control udp_replier(inout headers hdr, inout standard_metadata_t standard_metada
     table udp_replier_table {
         key = { standard_metadata.egress_port : exact;}
         actions = {
-		sendUDPReply;
-		NoAction;
-	}
+            sendUDPReply;
+            NoAction;
+        }
         size = MAX_WORKERS; //MAX worker count
         default_action = NoAction();
     }
@@ -23,3 +26,5 @@ control udp_replier(inout headers hdr, inout standard_metadata_t standard_metada
         udp_replier_table.apply();
     }
 }
+
+#endif /* _UDP_REPLIER_ */

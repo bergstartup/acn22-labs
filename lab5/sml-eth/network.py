@@ -4,7 +4,7 @@ from mininet.topo import Topo
 from mininet.cli import CLI
 import os
 
-NUM_WORKERS = 2 # TODO: Make sure your program can handle larger values
+NUM_WORKERS = 8
 
 class SMLTopo(Topo):
     def __init__(self, **opts):
@@ -39,11 +39,12 @@ def RunControlPlane(net):
     for key, value in switch.ports.items():
         if key.name.startswith(switch.name):
             ports.append(value)
+            
     # setting up the broadcast groups
     switch.addMulticastGroup(mgid=1, ports=ports)
     
 
-topo = SMLTopo() # TODO: Create an SMLTopo instance
+topo = SMLTopo()
 net = P4Mininet(program="p4/main.p4", topo=topo)
 net.run_control_plane = lambda: RunControlPlane(net)
 net.run_workers = lambda: RunWorkers(net)

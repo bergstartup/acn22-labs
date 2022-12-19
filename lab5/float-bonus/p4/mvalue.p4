@@ -1,4 +1,5 @@
-
+#ifndef _MVALUE_
+#define _MVALUE_
 #include "headers.p4"
 
 control GetMValue(inout headers hdr, in metadata meta) {
@@ -18,3 +19,4 @@ control GetMValue(inout headers hdr, in metadata meta) {
     }
 }
 
+#endif /* _MVALUE_ */

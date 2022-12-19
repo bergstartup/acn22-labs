@@ -8,7 +8,6 @@ typedef bit<16> port_t;
 typedef bit<16> ether_type_t;
 typedef bit<32> ipv4_addr_t;
 
-
 const ether_type_t ETHERTYPE_IPV4   = 16w0x0800;
 const ether_type_t ETHERTYPE_ARP    = 16w0x0806;
 const bit<32> MAX_WORKERS = 40;
@@ -22,13 +21,11 @@ enum bit<16> arp_opcode_t {
     REPLY   = 2
 }
 
-
 header ethernet_t {
   mac_addr_t dstAddr;
   mac_addr_t srcAddr;
   ether_type_t etherType;
 }
-
 
 header arp_h {
     bit<16>       hw_type;

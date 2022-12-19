@@ -36,7 +36,6 @@ parser TheParser(packet_in packet,
 
 control TheChecksumVerification(inout headers hdr, inout metadata meta) {
   apply {
-    /* TODO: Implement me (if needed) */
   }
 }
 
@@ -170,13 +169,11 @@ control TheEgress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
   apply {
-    /* TODO: Implement me (if needed) */
   }
 }
 
 control TheChecksumComputation(inout headers  hdr, inout metadata meta) {
   apply {
-    /* TODO: Implement me (if needed) */
   }
 }
 

@@ -6,11 +6,10 @@ from scapy.fields import *
 import socket
 from lib.comm import send,receive
 
-NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = 30  # TODO: Define me
+NUM_ITER = 2
+CHUNK_SIZE = 8
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
-
 
 class SwitchML(Packet):
     name = "SwitchMLPacket"
@@ -30,8 +29,6 @@ def AllReduce(soc, rank, data, result, total_worker):
 
     This function is blocking, i.e. only returns with a result or error
     """
-
-    # TODO: Implement me
     # NOTE: Do not send/recv directly to/from the socket.
     #       Instead, please use the functions send() and receive() from lib/comm.py
     #       We will use modified versions of these functions to test your program
@@ -40,7 +37,7 @@ def AllReduce(soc, rank, data, result, total_worker):
     for i in range(iterations):
         #SML header
         chunk_size = CHUNK_SIZE #Change for last element
-        
+
         #Payload
         #Divide the data arrays into chunk sizes
         chunk = data[chunk_size*i:chunk_size*(i+1)]
@@ -58,7 +55,7 @@ def AllReduce(soc, rank, data, result, total_worker):
         #take 4 bytes from the payload and create an integer array of the results
         print(SwitchML(recvd).payload.load)
         for j in range(chunk_size):
-            result[i * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big") 
+            result[i * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big")
 
 def main():
     rank = GetRankOrExit()

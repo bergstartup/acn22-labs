@@ -39,7 +39,6 @@ parser TheParser(packet_in packet,
         transition accept;
     }
 
-
     //Parse IP
     state parse_ipv4 {
       packet.extract(hdr.ipv4);
@@ -58,7 +57,6 @@ parser TheParser(packet_in packet,
       }
     }
   
-
     state parse_sml {
         packet.extract(hdr.sml);
         transition chunk_parser;
@@ -70,7 +68,6 @@ parser TheParser(packet_in packet,
     }
 }
 
-
 control TheChecksumVerification(inout headers hdr, inout metadata meta) {
 
    apply{
@@ -78,13 +75,11 @@ control TheChecksumVerification(inout headers hdr, inout metadata meta) {
 
 }
 
-
 control TheIngress(inout headers hdr,
                    inout metadata meta,
                    inout standard_metadata_t standard_metadata) {
                     
   // declare the controls
-
   arpResponder() arp;
   WorkerCounter() wctr;
 
@@ -124,7 +119,6 @@ control TheIngress(inout headers hdr,
   NextStep() nxt;
 
   // computational steps
-
   apply {
     //Handler ARP
     if (hdr.arp.isValid()) {
