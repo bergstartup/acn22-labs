@@ -5,7 +5,7 @@
 
 control Compute(in val_t inval, in headers hdr, in bit<32> index, out val_t outval, inout metadata meta) {
 
-    //Define register to store the sum
+    //Define register to store the sum, we have different registers for different slots
     register<bit<32>>(32) CHK0;
     register<bit<32>>(32) CHK1;
     apply {
