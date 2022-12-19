@@ -16,7 +16,7 @@ control udp_replier(inout headers hdr, inout standard_metadata_t standard_metada
 		sendUDPReply;
 		NoAction;
 	}
-        size = 8; //MAX worker count
+        size = MAX_WORKERS; //MAX worker count
         default_action = NoAction();
     }
     apply {

@@ -13,7 +13,7 @@ control Compute(in val_t inval, in headers hdr, in bit<32> index, out val_t outv
         if(index < hdr.sml.chunk_size) {
             
             if (meta.process == 0) {
-                //For reliablity read-only
+                //Duplicate packet so read-only
                 if(hdr.sml.slot_mod == 0) {
                     CHK0.read(outval, index);
                 } else {

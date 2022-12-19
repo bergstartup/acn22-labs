@@ -11,7 +11,7 @@ typedef bit<32> ipv4_addr_t;
 
 const ether_type_t ETHERTYPE_IPV4   = 16w0x0800;
 const ether_type_t ETHERTYPE_ARP    = 16w0x0806;
-
+const bit<32> MAX_WORKERS = 40;
 
 enum bit<8> ip_protocol_t {
     UDP  = 17

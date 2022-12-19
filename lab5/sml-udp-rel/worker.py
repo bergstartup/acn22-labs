@@ -7,7 +7,7 @@ import socket
 from lib.comm import unreliable_send,receive
 import sys
 
-NUM_ITER   = 2     # TODO: Make sure your program can handle larger values
+NUM_ITER   = 3     # TODO: Make sure your program can handle larger values
 CHUNK_SIZE = 32  # TODO: Define me
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
@@ -53,14 +53,13 @@ def AllReduce(soc, rank, data, result, total_worker):
         #Divide the data arrays into chunk sizes
         chunk = data[chunk_size*i:chunk_size*(i+1)]
         payload = bytearray() #Big endianess, because p4 runtime uses it
-        filler = [0 for i in range(chunk_size, MAX_CHUNK_SIZE)]
+        filler = [0 for j in range(chunk_size, MAX_CHUNK_SIZE)]
         chunk.extend(filler)
         for element in chunk:
             payload.extend(element.to_bytes(length=4,byteorder="big"))
 
         #Create frame
         switch_ml_packet = SwitchML(num_workers=int(total_worker), worker_rank=rank, chunk_size=chunk_size, chunk_id=i+1, total_chunks=iterations, slot_mod=i%2)/Raw(payload)
-        switch_ml_packet.show()
         while True:
             #Convert to bytes
             unreliable_send(soc, bytes(switch_ml_packet), Address_to_Send)
@@ -71,7 +70,6 @@ def AllReduce(soc, rank, data, result, total_worker):
                     break
             except:
                 pass
-        print("Recvd : ",recvd_chunk) 
         #take 4 bytes from the payload and create an integer array of the results
         for j in range(chunk_size):
             result[i * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big")
@@ -89,8 +87,8 @@ def main():
     Log("Started...")
     for i in range(NUM_ITER):
         num_elem = GenMultipleOfInRange(2, 2048, 2 * CHUNK_SIZE) # You may want to 'fix' num_elem for debugging
-        data_out = GenInts(2*CHUNK_SIZE)
-        data_in = GenInts(2*CHUNK_SIZE, 0)
+        data_out = GenInts(num_elem)
+        data_in = GenInts(num_elem, 0)
         CreateTestData("udp-rel-iter-%d" % i, rank, data_out)
         AllReduce(s, rank, data_out, data_in, num_workers)
         RunIntTest("udp-rel-iter-%d" % i, rank, data_in, True)
