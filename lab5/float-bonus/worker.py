@@ -1,4 +1,4 @@
-from lib.gen import GenInts, GenMultipleOfInRange
+from lib.gen import GenInts, GenFloats, GenMultipleOfInRange
 from lib.test import CreateTestData, RunFloatTest
 from lib.worker import *
 from scapy.all import Packet, Raw
@@ -7,7 +7,7 @@ import socket
 from lib.comm import unreliable_send,receive
 import sys
 
-NUM_ITER   = 3     # TODO: Make sure your program can handle larger values
+NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
 CHUNK_SIZE = 32  # TODO: Define me
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
@@ -25,12 +25,12 @@ class SwitchML(Packet):
     ]
 
 def get_m(chunk):
-    high = max(chunk)
+    high = int(max([abs(i) for i in chunk]))
     count = 0
     while high!=0:
         high = high>>1
         count += 1
-    return count-1
+    return count
     
 def AllReduce(soc, rank, data, result, total_worker):
     """
@@ -60,34 +60,28 @@ def AllReduce(soc, rank, data, result, total_worker):
     for i in range(iterations):
         #SML header
         chunk_size = CHUNK_SIZE #Change for last element
-        
-
-
-        #Payload
-        #Divide the data arrays into chunk sizes and scale it
+         
+        #Divide the data arrays into chunk sizes and scale it based on recvd M value and then round it
         chunk = makeup_data[chunk_size*i:chunk_size*(i+1)]
         for j in range(len(chunk)):
-            chunk[j] *= scaling_factor
+            chunk[j] = int(chunk[j] * scaling_factor)
         
         #Get possible m for next chunk
-        qc = makeup_data[chunk_size*(i+1):chunk_size*(i+2)]
-        try:
-            m_val = get_m(qc)
-        except:
-            m_val = 0
+        next_chunk = makeup_data[chunk_size*(i+1):chunk_size*(i+2)]
+        m_val = 0
+        if(len(next_chunk) != 0):
+            m_val = get_m(next_chunk)
         
-        
-        #Divide the data arrays into chunk sizes
-        chunk = data[chunk_size*i:chunk_size*(i+1)]
+       
+        #Make payload
         payload = bytearray() #Big endianess, because p4 runtime uses it
         filler = [0 for j in range(chunk_size, MAX_CHUNK_SIZE)]
         chunk.extend(filler)
         for element in chunk:
             payload.extend(element.to_bytes(length=4,byteorder="big"))
-
-        #Create frame
         switch_ml_packet = SwitchML(num_workers=int(total_worker), worker_rank=rank, chunk_size=chunk_size, chunk_id=i+1, total_chunks=iterations, m_val = m_val,slot_mod=i%2)/Raw(payload)
-        switch_ml_packet.show()
+        
+        #Send the data
         while True:
             #Convert to bytes
             unreliable_send(soc, bytes(switch_ml_packet), Address_to_Send)
@@ -99,15 +93,16 @@ def AllReduce(soc, rank, data, result, total_worker):
             except:
                 pass
 
-        #Get scaling factor
+        #Get scaling factor for next chunk
         replied_m = SwitchML(recvd).m_val
         prev_factor = scaling_factor
-        scaling_factor = int((2**31-1)/(int(total_worker)*(2**replied_m)))
+        scaling_factor = (2**31-1)/(int(total_worker)*(2**replied_m))
 
         #Ignore init packet
         if i==0:
             continue
-        #take 4 bytes from the payload and create an integer array of the results
+
+        #Add to result chunk by scaling back
         for j in range(chunk_size):
             try:
                 result[(i-1) * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big") / prev_factor
@@ -126,8 +121,8 @@ def main():
     Log("Started...")
     for i in range(NUM_ITER):
         num_elem = GenMultipleOfInRange(2, 2048, 2 * CHUNK_SIZE) # You may want to 'fix' num_elem for debugging
-        data_out = GenInts(num_elem)
-        data_in = GenInts(num_elem, 0)
+        data_out = GenFloats(num_elem)
+        data_in = GenFloats(num_elem, 0)
         CreateTestData("udp-rel-iter-%d" % i, rank, data_out)
         AllReduce(s, rank, data_out, data_in, num_workers)
         RunFloatTest("udp-rel-iter-%d" % i, rank, data_in, True)
