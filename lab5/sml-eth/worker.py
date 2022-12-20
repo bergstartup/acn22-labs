@@ -11,10 +11,8 @@ from scapy.fields import *
 from scapy.sendrecv import *
 import sys
 
-
-
-NUM_ITER   = 1    # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = 30  # TODO: Define me
+NUM_ITER = 2
+CHUNK_SIZE = 8
 SRC_MAC_ADDRESS = get_if_hwaddr("eth0")
 DST_MAC_ADDRESS = 'ff:ff:ff:ff:ff:ff'
 MAX_CHUNK_SIZE = 32

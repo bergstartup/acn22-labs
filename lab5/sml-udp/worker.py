@@ -6,8 +6,8 @@ from scapy.fields import *
 import socket
 from lib.comm import send,receive
 
-NUM_ITER   = 1     # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = 30  # TODO: Define me
+NUM_ITER = 2 
+CHUNK_SIZE = 8
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
 
@@ -30,8 +30,6 @@ def AllReduce(soc, rank, data, result, total_worker):
 
     This function is blocking, i.e. only returns with a result or error
     """
-
-    # TODO: Implement me
     # NOTE: Do not send/recv directly to/from the socket.
     #       Instead, please use the functions send() and receive() from lib/comm.py
     #       We will use modified versions of these functions to test your program

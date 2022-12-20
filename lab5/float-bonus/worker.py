@@ -7,8 +7,8 @@ import socket
 from lib.comm import unreliable_send,receive
 import sys
 
-NUM_ITER   = 3     # TODO: Make sure your program can handle larger values
-CHUNK_SIZE = 32  # TODO: Define me
+NUM_ITER = 2
+CHUNK_SIZE = 8
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
 
@@ -43,8 +43,6 @@ def AllReduce(soc, rank, data, result, total_worker):
 
     This function is blocking, i.e. only returns with a result or error
     """
-
-    # TODO: Implement me
     # NOTE: Do not send/recv directly to/from the socket.
     #       Instead, please use the functions send() and receive() from lib/comm.py
     #       We will use modified versions of these functions to test your program
@@ -116,7 +114,7 @@ def AllReduce(soc, rank, data, result, total_worker):
 def main():
     rank = GetRankOrExit()
 
-    s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)# TODO: Create a UDP socket. 
+    s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     s.bind(("0.0.0.0",8000))
     # NOTE: This socket will be used for all AllReduce calls.
     #       Feel free to go with a different design (e.g. multiple sockets)

@@ -7,7 +7,6 @@ typedef bit<16> ether_type_t;
 typedef bit<32> val_t;
 
 header ethernet_t {
-  /* TODO: Define me */
   mac_addr_t dstAddr;
   mac_addr_t srcAddr;
   ether_type_t etherType;
