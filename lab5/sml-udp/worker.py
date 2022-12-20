@@ -6,11 +6,10 @@ from scapy.fields import *
 import socket
 from lib.comm import send,receive
 
-NUM_ITER = 2 
+NUM_ITER = 2
 CHUNK_SIZE = 8
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
-
 
 class SwitchML(Packet):
     name = "SwitchMLPacket"
@@ -38,7 +37,7 @@ def AllReduce(soc, rank, data, result, total_worker):
     for i in range(iterations):
         #SML header
         chunk_size = CHUNK_SIZE #Change for last element
-        
+
         #Payload
         #Divide the data arrays into chunk sizes
         chunk = data[chunk_size*i:chunk_size*(i+1)]
@@ -56,7 +55,7 @@ def AllReduce(soc, rank, data, result, total_worker):
         #take 4 bytes from the payload and create an integer array of the results
         print(SwitchML(recvd).payload.load)
         for j in range(chunk_size):
-            result[i * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big") 
+            result[i * chunk_size + j] = int.from_bytes(SwitchML(recvd).payload.load[j * 4: (j + 1) * 4], "big")
 
 def main():
     rank = GetRankOrExit()

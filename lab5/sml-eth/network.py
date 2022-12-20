@@ -39,6 +39,7 @@ def RunControlPlane(net):
     for key, value in switch.ports.items():
         if key.name.startswith(switch.name):
             ports.append(value)
+            
     # setting up the broadcast groups
     switch.addMulticastGroup(mgid=1, ports=ports)
     

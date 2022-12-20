@@ -11,7 +11,7 @@ control Compute(in val_t inval, in headers hdr, in bit<32> index, out val_t outv
     apply {
         outval = 0;
         if(index < hdr.sml.chunk_size) {
-            
+
             if (meta.process == 0) {
                 //Duplicate packet so read-only
                 if(hdr.sml.slot_mod == 0) {
@@ -20,12 +20,12 @@ control Compute(in val_t inval, in headers hdr, in bit<32> index, out val_t outv
                     CHK1.read(outval, index);
                 }
 
-            } 
-            
+            }
+
             else {
                 // Check if this chunk index is within the chunk size
                 // This is to handle varying chunk sizes upto 32
-                
+
                     // Check if it is first packet
                     if(meta.first_last_flag == 0) {
                         if(hdr.sml.slot_mod == 0) {
@@ -34,8 +34,8 @@ control Compute(in val_t inval, in headers hdr, in bit<32> index, out val_t outv
                             CHK1.write(index, inval);
                         }
                         outval = inval;
-                    } 
-                    
+                    }
+
                     else {
                         val_t current_value = 0;
                         if(hdr.sml.slot_mod == 0) {

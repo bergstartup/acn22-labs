@@ -1,4 +1,4 @@
-# This code is part of the Advanced Computer Networks (ACN) course at Vrije 
+# This code is part of the Advanced Computer Networks (ACN) course at Vrije
 # Universiteit Amsterdam.
 
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not

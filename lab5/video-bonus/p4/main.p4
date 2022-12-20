@@ -17,7 +17,7 @@ parser TheParser(packet_in packet,
         transition parse_ethernet;
     }
 
-    state parse_ethernet { 
+    state parse_ethernet {
         packet.extract(hdr.eth);
         transition select(hdr.eth.etherType) {
           ETHERTYPE_ARP: parse_arp;
@@ -40,7 +40,6 @@ parser TheParser(packet_in packet,
         transition accept;
     }
 
-
     //Parse IP
     state parse_ipv4 {
       packet.extract(hdr.ipv4);
@@ -59,7 +58,6 @@ parser TheParser(packet_in packet,
         default: accept;
       }
     }
-  
 
     state parse_sml {
         packet.extract(hdr.sml);
@@ -74,17 +72,14 @@ parser TheParser(packet_in packet,
 
 
 control TheChecksumVerification(inout headers hdr, inout metadata meta) {
-
    apply{
   }
-
 }
 
 
 control TheIngress(inout headers hdr,
                    inout metadata meta,
                    inout standard_metadata_t standard_metadata) {
-                    
   // declare the controls
 
   arpResponder() arp;
@@ -138,7 +133,7 @@ control TheIngress(inout headers hdr,
       hdr.eth.dstAddr = dstAddr;
       hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
   }
-  
+
   table ipv4_lpm {
       key = {
           hdr.ipv4.dstAddr: lpm;
@@ -153,7 +148,6 @@ control TheIngress(inout headers hdr,
   }
 
   // computational steps
-
   apply {
     //Handler ARP
     if (hdr.arp.isValid()) {
@@ -237,7 +231,6 @@ control TheIngress(inout headers hdr,
       }
       //End of atomic execution
     }
-    
     // else check for normal ipv4 routing
     else if (hdr.ipv4.isValid()) {
       ipv4_lpm.apply();
@@ -249,12 +242,11 @@ control TheIngress(inout headers hdr,
 control TheEgress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-  
   udp_replier() ur;
   apply {
     // i only care about sml for now
     if(hdr.sml.isValid()) {
-    	ur.apply(hdr, standard_metadata);
+      ur.apply(hdr, standard_metadata);
     }
   }
 }
@@ -263,7 +255,7 @@ control TheChecksumComputation(inout headers  hdr, inout metadata meta) {
   apply {
    update_checksum(
       hdr.ipv4.isValid(),
-      { 
+      {
         hdr.ipv4.version,
         hdr.ipv4.ihl,
         hdr.ipv4.diffserv,
@@ -283,7 +275,7 @@ control TheChecksumComputation(inout headers  hdr, inout metadata meta) {
     // if udp is present update checksum
     update_checksum_with_payload(
       hdr.udp.isValid(),
-      { 
+      {
           hdr.ipv4.srcAddr,
           hdr.ipv4.dstAddr,
           (bit<8>)0x00,
@@ -299,7 +291,7 @@ control TheChecksumComputation(inout headers  hdr, inout metadata meta) {
 
     update_checksum(
       hdr.sml.isValid(),
-      { 
+      {
         hdr.ipv4.srcAddr,
         hdr.ipv4.dstAddr,
         (bit<8>)0x00,

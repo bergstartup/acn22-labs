@@ -7,7 +7,7 @@ import socket
 from lib.comm import unreliable_send,receive
 import sys
 
-NUM_ITER = 2 
+NUM_ITER = 2
 CHUNK_SIZE = 8
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
@@ -46,7 +46,7 @@ def AllReduce(soc, rank, data, result, total_worker):
     for i in range(iterations):
         #SML header
         chunk_size = CHUNK_SIZE #Change for last element
-        
+
         #Payload
         #Divide the data arrays into chunk sizes
         chunk = data[chunk_size*i:chunk_size*(i+1)]
@@ -80,7 +80,7 @@ def main():
     # NOTE: This socket will be used for all AllReduce calls.
     #       Feel free to go with a different design (e.g. multiple sockets)
     #       if you want to, but make sure the loop below still works
-    
+
     num_workers = sys.argv[2]
     Log("Started...")
     for i in range(NUM_ITER):

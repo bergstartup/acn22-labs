@@ -1,3 +1,6 @@
+#ifndef _UDP_REPLIER_
+#define _UDP_REPLIER_
+
 #include "headers.p4"
 
 control udp_replier(inout headers hdr, inout standard_metadata_t standard_metadata) {
@@ -23,3 +26,5 @@ control udp_replier(inout headers hdr, inout standard_metadata_t standard_metada
         udp_replier_table.apply();
     }
 }
+
+#endif /* _UDP_REPLIER_ */

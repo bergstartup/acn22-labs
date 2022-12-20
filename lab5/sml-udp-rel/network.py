@@ -10,7 +10,7 @@ NUM_WORKERS = 8
 class SMLTopo(Topo):
     def __init__(self, **opts):
         Topo.__init__(self, **opts)
-        
+
     def build(self):
         switch = self.addSwitch("s1")
         for i in range(NUM_WORKERS):
@@ -52,7 +52,7 @@ def RunControlPlane(net):
         host = link.intf2
         port_no = sw.node.ports[sw]
         port_to_node[port_no] = host.node
-        
+
     for key, value in switch.ports.items():
         if key.name.startswith(switch.name):
             switch.insertTableEntry(

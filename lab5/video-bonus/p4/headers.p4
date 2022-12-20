@@ -9,7 +9,6 @@ typedef bit<16> ether_type_t;
 typedef bit<32> ipv4_addr_t;
 typedef bit<9> egressSpec_t;
 
-
 const ether_type_t ETHERTYPE_IPV4   = 16w0x0800;
 const ether_type_t ETHERTYPE_ARP    = 16w0x0806;
 const bit<32> MAX_WORKERS = 40;
@@ -30,7 +29,6 @@ header ethernet_t {
   mac_addr_t srcAddr;
   ether_type_t etherType;
 }
-
 
 header arp_h {
     bit<16>       hw_type;
@@ -123,8 +121,8 @@ struct headers {
   chunk_t chk;
 }
 
-struct metadata { 
-  bit<32> first_last_flag; //1 if last; 0 if first 
+struct metadata {
+  bit<32> first_last_flag; //1 if last; 0 if first
   bit<1> process;
 }
 
