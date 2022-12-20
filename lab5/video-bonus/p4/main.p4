@@ -81,7 +81,6 @@ control TheIngress(inout headers hdr,
                    inout metadata meta,
                    inout standard_metadata_t standard_metadata) {
   // declare the controls
-
   arpResponder() arp;
 
   relChecker() rel;
