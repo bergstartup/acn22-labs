@@ -7,8 +7,8 @@ import socket
 from lib.comm import unreliable_send,receive
 import sys
 
-NUM_ITER = 2
-CHUNK_SIZE = 8
+NUM_ITER = 1
+CHUNK_SIZE = 32
 Address_to_Send = ("10.0.0.0",8000)
 MAX_CHUNK_SIZE = 32
 

@@ -70,7 +70,6 @@ parser TheParser(packet_in packet,
     }
 }
 
-
 control TheChecksumVerification(inout headers hdr, inout metadata meta) {
    apply{
   }

@@ -23,7 +23,6 @@ enum bit<16> arp_opcode_t {
     REPLY   = 2
 }
 
-
 header ethernet_t {
   mac_addr_t dstAddr;
   mac_addr_t srcAddr;
