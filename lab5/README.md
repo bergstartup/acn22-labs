@@ -1,4 +1,4 @@
-## Code skeleton for Lab 5: Switches Do Dream of Machine Learning
+Switches Do Dream of Machine Learning
 
 For each bonus you attempt, you should:
 
